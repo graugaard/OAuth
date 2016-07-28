@@ -24,7 +24,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/json-20140107.jar!/" />
+          <root url="jar://C:/prg/jar_library/json-20140107.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
