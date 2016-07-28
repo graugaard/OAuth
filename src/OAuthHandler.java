@@ -12,11 +12,12 @@ import java.util.logging.*;
  * Created by jakob on 28/07/2016.
  */
 
-@Path("/oauth")
+@Path("oauth/*")
 public class OAuthHandler {
 
     @GET
-    public Response getAccessToken(@QueryParam("client_id") String clientId,
+    @Path("/get_code")
+    public Response getAuthorazationCode(@QueryParam("client_id") String clientId,
                                    @QueryParam("permissions") String permissionsString,
                                    @QueryParam("redirect_uri") String redirectUri) {
         List<String> permissions = new ArrayList<String>();
