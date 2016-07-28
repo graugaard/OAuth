@@ -8,9 +8,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
   <head>
-    <title>$Title$</title>
+    <title>Test bed</title>
   </head>
   <body>
-  $END$
+  <script src="test.js"></script>
+  Simple test.
+  <button onclick="login()">Test the thing out</button>
   </body>
 </html>
