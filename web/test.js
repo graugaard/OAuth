@@ -1,7 +1,8 @@
 /**
  * Created by jakob on 28/07/2016.
  */
-var oauth_provider = "http://graugaard.bobach.eu:8080/OAuth/rest/oauth"
+//var oauth_provider = "http://graugaard.bobach.eu:8080/OAuth/rest/oauth"
+var oauth_provider = "http://localhost:8080/OAuth/rest/oauth"
 var appId = 1;
 var appUri = window.location.href + "index.jsp";
 var appScope = "abit,some_more";

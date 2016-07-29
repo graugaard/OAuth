@@ -18,7 +18,8 @@ import java.util.logging.*;
 
 @Path("oauth")
 public class OAuthHandler {
-
+    //private String domain = "http://graugaard.bobach.eu:8080/";
+    private String domain = "http://localhost:8080";
     @GET
     @Path("get_code")
     @Produces(MediaType.APPLICATION_JSON)
@@ -66,6 +67,28 @@ public class OAuthHandler {
             object.put("access_token", "error");
             return Response.status(Response.Status.OK).entity(object.toString()).build();
         }
+    }
+
+    @GET
+    @Path("get_token_permissions")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserAndTokenPermissions(@QueryParam("token") String token) {
+        JSONObject o = new JSONObject();
+        JSONArray permissions = new JSONArray();
+
+        o.put("user", "user");
+        permissions.put("food");
+        permissions.put("film");
+        permissions.put("book");
+        permissions.put("fear");
+        permissions.put("game");
+        o.put("permissions", permissions);
+
+        return buildResponse(Response.Status.OK, o.toString());
+    }
+
+    private Response buildResponse(Response.Status status, Object e) {
+        return Response.status(status).entity(e).build();
     }
 
     private JSONObject generateToken(String clientId) {

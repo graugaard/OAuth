@@ -1,7 +1,7 @@
 <component name="ArtifactManager">
   <artifact type="war" name="OAuth:war">
     <output-path>$PROJECT_DIR$/out/artifacts/OAuth_war</output-path>
-    <root id="archive" name="OAuth_war.war">
+    <root id="archive" name="OAuth.war">
       <element id="artifact" artifact-name="OAuth:war exploded" />
       <element id="directory" name="WEB-INF">
         <element id="directory" name="lib">
