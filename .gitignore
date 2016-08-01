@@ -3,6 +3,7 @@
 *.out
 *.pdf
 *.iml
+*.thm
 .idea
 lib
 out
