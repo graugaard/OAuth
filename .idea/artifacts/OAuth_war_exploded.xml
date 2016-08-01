@@ -10,6 +10,7 @@
           <element id="library" level="project" name="Jersey-2.2" />
           <element id="file-copy" path="C:/prg/jar_library/json-20140107.jar" />
           <element id="file-copy" path="$PROJECT_DIR$/../lib/json-20140107.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../jar/json-20140107.jar" />
         </element>
       </element>
       <element id="javaee-facet-resources" facet="OAuth/web/Web" />

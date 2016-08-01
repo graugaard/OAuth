@@ -1,3 +1,4 @@
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -14,6 +15,7 @@ import java.util.logging.*;
 
 /**
  * Created by jakob on 28/07/2016.
+ *
  */
 
 @Path("oauth")
@@ -52,20 +54,45 @@ public class OAuthHandler {
         json.put("auth_code", code);
         json.put("redirect_uri", redirect);
 
-        return Response.status(Response.Status.OK).entity(json.toString()).build();
+        return Response
+                .ok()
+                .entity(json.toString())
+                .build();
     }
 
     @GET
-    public Response exchangeCodeForToken(@QueryParam("code") String authCode,
+    @Produces("application/javascript")
+    public String exchangeCodeForToken(@QueryParam("code") String authCode,
                                          @QueryParam("client_id") String clientId,
-                                         @QueryParam("client_secret") String clientSecret) {
+                                         @QueryParam("client_secret") String clientSecret,
+                                         @QueryParam("callback") String callback) {
+        System.out.print("WORKING!!!");
+
         if (codeAndClientIdMatch(authCode, clientId)) {
+
+
             JSONObject object = generateToken(clientId);
-            return Response.status(Response.Status.OK).entity(object.toString()).build();
+//            return Response
+//                    .ok()
+//                    .entity(object.toString())
+//                    .header("Access-Control-Allow-Origin", "*")
+//                    .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
+//                    .allow("OPTIONS")
+//                    .build();
+
+            return (callback + '(' + object.toString() + ')');
         } else {
             JSONObject object = new JSONObject();
             object.put("access_token", "error");
-            return Response.status(Response.Status.OK).entity(object.toString()).build();
+//            return Response
+//                    .ok()
+//                    .entity(object.toString())
+//                    .header("Access-Control-Allow-Origin", "*")
+//                    .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
+//                    .allow("OPTIONS")
+//                    .build();
+
+            return null;
         }
     }
 
