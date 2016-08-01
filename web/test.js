@@ -7,13 +7,18 @@ var appId = 1;
 var appUri = window.location.href + "index.jsp";
 var appScope = "abit,some_more";
 
-function login() {
+window.onload = function () {
+    setPermissions();
+}
 
+function login() {
+    var permissions = getPermissions();
     var url = oauth_provider + "/get_code?"
         + "client_id=" + getParameterByName("client_id")
         + "&redirect_uri=" + getParameterByName("redirect_uri")
-        + "&permissions=" + getParameterByName("permissions");
+        + "&permissions=" + permissions;
     document.getElementById("status").innerHTML = url;
+    console.log(url);
     sendRequest("GET", url,
     null,
     function(response) {
@@ -21,9 +26,41 @@ function login() {
         if (json.auth_code === "error") {
             ;
         } else {
+            //document.getElementById("status").innerHTML = response;
             window.location = "" + json.redirect_uri + "?code=" + json.auth_code;
         }
     });
+}
+
+function getPermissions() {
+    var permissions = "";
+    var arr = [];
+    if (document.getElementById("food").checked)
+        arr.push("food");
+    if (document.getElementById("film").checked)
+        arr.push("film");
+    if (document.getElementById("book").checked)
+        arr.push("book");
+    if (document.getElementById("fear").checked)
+        arr.push("fear");
+    if (document.getElementById("game").checked)
+        arr.push("game");
+    for(i = 0; i < arr.length; i++) {
+        if (i > 0) {
+            permissions = permissions + ",";
+        }
+        permissions = permissions + arr[i];
+    }
+    return permissions;
+}
+
+function setPermissions() {
+    var x = getParameterByName("permissions").split(",");
+
+    for(i = 0; i < x.length; i++) {
+        document.getElementById(x[i]).checked = true;
+    }
+
 }
 
 // From the dWebTek course

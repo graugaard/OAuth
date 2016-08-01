@@ -1,17 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>OAuth - Renaming the title for tests</title>
-</head>
-<body>
-<script src="test.js"></script>
-<h1>This site is unsafe and should not be used seriously</h1>
-<h2>Test</h2>
-Hello there, welcome to the site. This is merely a simple page to facilitate the creators wish to understand OAuth<br/>
+    <head>
+        <meta charset="UTF-8">
+        <title>OAuth - Renaming the title for tests</title>
+    </head>
+    <body>
+        <script src="test.js"></script>
+        <h1>This site is unsafe and should not be used seriously</h1>
+        <h2>Test</h2>
+        Hello there, welcome to the site. This is merely a simple page to facilitate the creators wish to understand OAuth<br/>
 
-As such, press the login button to login as user. You should then return from where you came.
-<button onclick="login()">Login as user</button>
-<div id="status"></div>
-</body>
+        As such, press the login button to login as user. You should then return from where you came.
+
+        <div id="status"></div>
+        Pick which of the favorite things you will allow the app to see<br/>
+        <table>
+            <tr>
+            <td>Food:</td> <td><input type="checkbox" id="food"/></td>
+            </tr>
+            <tr>
+            <td>Film:</td><td> <input type="checkbox" id="film"/></td>
+            </tr>
+            <tr>
+            <td>Book:</td><td><input type="checkbox" id="book"/></td>
+            </tr>
+            <tr>
+            <td>Fear:</td><td><input type="checkbox" id="fear"/></td>
+            </tr>
+            <tr>
+            <td>Game:</td><td><input type="checkbox" id="game"/></td>
+            </tr>
+        </table>
+    </body>
+
+    <button onclick="login()">Login as user</button>
 </html>

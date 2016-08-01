@@ -53,7 +53,7 @@ public class ResourceHandler {
             }
         }
 
-        return Response.status(Response.Status.OK).entity(s.toString()).build();
+        return Response.status(Response.Status.OK).entity(o.toString()).build();
     }
 
     private String makeRequest(String urlString) throws IOException {
