@@ -24,6 +24,9 @@ public class OAuthHandler {
     //private String domain = "http://graugaard.bobach.eu:8080/";
     private String domain = "http://localhost:8080";
 
+    private final int TOKEN_LENGTH = 256/8;     // length in bytes
+    private final int AUTH_CODE_LENGTH = 256/8;
+
     @Context
     private ServletContext context;
 
@@ -43,36 +46,36 @@ public class OAuthHandler {
         }
         URI uri = null;
 
+        String code = generateRandomHexString(AUTH_CODE_LENGTH);
+
+        String redirect = "";
         try {
-            uri = new URI(redirectUri + "?code=" + 5);
+            uri = new URI(redirectUri + "?code=" + code);
         } catch (URISyntaxException e) {
             e.printStackTrace();
-            System.out.println("Error");
+            uri = null;
         }
-        String code = "";
-        String redirect = "";
+
         if (uri == null) {
             redirect = "error";
             code = "error";
         } else {
-            code = "5";
             redirect = redirectUri;
         }
 
-        JSONObject o = new JSONObject();
-        o.put("user", "user");
+        JSONObject userObj = new JSONObject();
+        userObj.put("user", "user");
         JSONArray arr = new JSONArray();
         for (String s : permissions) {
             arr.put(s);
         }
-        o.put("permissions", arr);
+        userObj.put("permissions", arr);
 
-        bindCodeClientToUserPermissions(new CodeClientPair(code, clientId),
-                    o);
+        bindCodeClientToUserPermissions(new CodeClientPair(code, clientId), userObj);
         json.put("auth_code", code);
         json.put("redirect_uri", redirect);
 
-        return Response.status(Response.Status.OK).entity(json.toString()).build();
+        return buildResponse(Response.Status.OK, json.toString());
     }
 
     @Context
@@ -97,6 +100,7 @@ public class OAuthHandler {
         m.put(codeClientPair, o);
     }
 
+    // class used to tie an authorization & client id pair to a user
     private class CodeClientPair {
         public String getCode() {
             return code;
@@ -141,17 +145,15 @@ public class OAuthHandler {
                                          @QueryParam("client_secret") String clientSecret)
     {
         JSONObject o = getUserFromAuthCode(authCode,clientId);
+        JSONObject accessToken = new JSONObject();
         if (o != null) {
-            String token = generateToken();
+            String token = generateRandomHexString(TOKEN_LENGTH);
             bindTokenToUser( token, o );
-            JSONObject obj = new JSONObject();
-            obj.put("access_token", token);
-            return Response.status(Response.Status.OK).entity(obj.toString()).build();
+            accessToken.put("access_token", token);
         } else {
-            JSONObject object = new JSONObject();
-            object.put("access_token", "error");
-            return Response.status(Response.Status.OK).entity(object.toString()).build();
+            accessToken.put("access_token", "error");
         }
+        return buildResponse(Response.Status.OK, accessToken.toString());
     }
 
     private void bindTokenToUser(String token,
@@ -166,36 +168,6 @@ public class OAuthHandler {
         m.put(token, o);
     }
 
-    private class ClientTokenPair {
-        public String getCode() {
-            return code;
-        }
-
-        private String code = "";
-
-        public String getClientId() {
-            return clientId;
-        }
-
-        private String clientId = "";
-
-        public ClientTokenPair(String code, String clientId) {
-            this.code = code;
-            this.clientId = clientId;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            CodeClientPair that = (CodeClientPair) o;
-
-            if (!code.equals(that.code)) return false;
-            return clientId.equals(that.clientId);
-
-        }
-    }
 
     @GET
     @Path("get_token_permissions")
@@ -229,7 +201,7 @@ public class OAuthHandler {
         return Response.status(status).entity(e).build();
     }
 
-    private String generateToken()
+    private String generateRandomHexString(int length)
     {
         SecureRandom rng = new SecureRandom();
 

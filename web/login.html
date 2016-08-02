@@ -2,18 +2,20 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>OAuth - Renaming the title for tests</title>
+        <title>OAuth - login</title>
     </head>
     <body>
         <script src="test.js"></script>
         <h1>This site is unsafe and should not be used seriously</h1>
-        <h2>Test</h2>
+        <h2>Login and grant permissions</h2>
         Hello there, welcome to the site. This is merely a simple page to facilitate the creators wish to understand OAuth<br/>
 
         As such, press the login button to login as user. You should then return from where you came.
 
         <div id="status"></div>
-        Pick which of the favorite things you will allow the app to see<br/>
+        Pick which of the favorite things you will allow the app to see. Username will always be aviable.<br/>
+        Note that what is marked is what the app asked for, but in this case only you can grant more rights.<br/>
+        In a proper implementation, you should only be allowed to grant rights to that the app explictly asked for<br/>
         <table>
             <tr>
             <td>Food:</td> <td><input type="checkbox" id="food"/></td>
