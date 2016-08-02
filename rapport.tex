@@ -39,7 +39,7 @@
 %You should not be using an OAuth library, but implement the flow yourself, other libraries (network, encoding, etc.) are fine.
 %Keep it simple: You are allowed to cut some corners, you don’t have to use TLS, you do not need to have proper error handling etc. Only implement the “Sunshine scenario”.
 
-Vi har lavet en simpel OAuth implementation med client\footnote{clienten kører på \url{http://graugaard.bobach.eu:8080/Client}.}, authoraization server\footnote{Authorization serveren kører på \url{http://graugaard.bobach.eu:8080/OAuth/rest/oauth}.} og resource server\footnote{resource serveren kører på \url{http://graugaard.bobach.eu:8080/OAuth/rest/resource}}. Vi har taget udgangspunkt i figur 3 fra \cite{iogp}  da vi lavede vores implementation.
+Vi har lavet en simpel OAuth implementation med client\footnote{Clienten kører på \url{http://graugaard.bobach.eu:8080/Client}.}, authoraization server\footnote{Authorization serveren kører på \url{http://graugaard.bobach.eu:8080/OAuth/rest/oauth}.} og resource server\footnote{Resource serveren kører på \url{http://graugaard.bobach.eu:8080/OAuth/rest/resource}}. Vi har taget udgangspunkt i figur 3 fra noterne\cite{iogp}  da vi lavede vores implementation. Vores implementation er lavet i Java, autorization og recourse serverne er implementert med JAX-RS og clienten med JSF.
 
 For at få adgang til clienten benyttes dette link \url{http://graugaard.bobach.eu:8080/Client/client.jsf}.
 
@@ -48,21 +48,19 @@ Vores flow er som følger
     \item Brugeren kontakter clienten via browseren og forsøgere at logge ind.
     \item Brugeren redirectes til authorization serveren med et id der identificere clienten, de permissions clienten forespørger og en uri hvor på svaret skal komme.
     \item Authorization serveren beder om verifikation fra brugeren og tilladelse om permissions på vejne af clienten.
-    \item Brugerene verificere sig og giver tilladelse til de permissions som clieneten forespørger (brugeren kan udvide scope hvis ønsket).
+    \item Brugerene verificere sig og giver tilladelse til de permissions som clieneten forespørger(brugeren kan udvide scope hvis ønsket).
     \item Authorization servern generere en authorization code og redirecter brugeren til clienten på den korrekte uri.
     \item Clienten kontakter nu authorization serveren med id og authorization code.
     \item Authorization serveren generere nu en access token og sender denne til clienten.
-    \item Clienten kontakter da recurse serveren med access token og permissions.
+    \item Clienten kontakter da resource serveren med access token og permissions.
     \item Resource serveren verificere access tokenen med authorizations serveren og sender resourcerne til clienten.
 \end{enumerate}
-
-Vi bruger ingen form for kryptologiske midler i vores implementation, så alt kommunikation foregår i plain text.
 
 \section*{Threat analayse}
 %Choose two different threats, and analyze if your implementation is secure against these threats. If not what could you have done to make it secure.
 %RFC 6819: OAuth 2.0 Threat Model and Security Considerations: https://tools.ietf.org/html/rfc6819
 %The OAuth 2.0 Authorization Framework: https://tools.ietf.org/html/rfc6749
-Vi benytter os ikke af SSL/TLS og derfor er alt åben for adversary. Vi ser bort fra det i diskussionen, da de aspekter der er unikke for OAuth er mere interresante.
+Vi benytter os ikke af SSL/TLS og derfor er alt åben for en adversary. Vi ser bort fra det i diskussionen, da de aspekter der er unikke for OAuth er mere interresante.
 
 \subsection*{Obtaining Access Tokens from Authorization Server Database}
 I vores implementation er access tokens gemt i plaintext. Dermed kan en advesary der får adgang til serveren nemt aflæse disse og benytte sig af dem.
@@ -75,26 +73,26 @@ Til forskel fra password kan man her med fordel benytte sig af en af de hurtige 
 
 Ved at sørge for at tokens er tilfældigt generet og lange betyder at vores message space er stort og derfor er dictionary attacks ikke feasible, grundet størrelsen af dictonaryet.
 
-Der er ikke nogen grund til at benytte sig af salted hash hvis access tokens er genereret tilfældige i det fulde message space. Da sansynligheden for at få en collision med en kryptografisk collision resistent hash funktion ikke er tilstede.
+Der er ikke nogen grund til at benytte sig af salted hash hvis access tokens er genereret tilfældige i det fulde message space. Da sansynligheden for at få en collision med en kryptografisk collision resistent hash funktion ikke er til stede.
 
 \subsection*{Authorization Code Redirection URI Manipulation}
-I implementationen benytter vi os ikke af nogen form for checks på redirect uri'en fra clienten. Dette kan udnyttes af en adversary. 
+I implementationen benytter vi os ikke af nogen form for checks på redirect uri'en fra clienten. Dette kan udnyttes af en adversary.
 
-redirect samt client\_id uri paremetererne kan ændres mellem client, user agent og authorization server redirected. Det kan være en inficeret client eller en adversary der er kommet i besidelse af et client id, som prøver at få fat i informationer omkring bruger. Adversaryen kan da omdirigere brugeren til sin egen uri og dermed få en auth code som resource owner havde tiltænkt den client han eller hun startede ved.
+Redirect samt client\_id uri paremetererne kan ændres mellem client, user agent og authorization server redirected. Det kan være en inficeret client eller en adversary der er kommet i besidelse af et client id, som prøver at få fat i informationer omkring bruger. Adversaryen kan da omdirigere brugeren til sin egen uri og dermed få en authorization code som resource owner havde tiltænkt den client han eller hun startede ved.
 
  Dette kan forhindres hvis clienten registrerer en redirect uri hos authorization serveren, så denne kan verificere at uri'en er en der er kendt og knyttet op på clienten som brugen forsøger at benytte sig af. Dog er det vigtigt at denne uri er absolut addresse, da ellers kunne en advesary manipulere redirect\_uri på sådan en måde at han igen kan skaffe sig auth\_code.
 
 
 \section*{Sammenligning med OpenID Connect}
 %Compare your implementation with the OpenID Connect protocol, which changes would you have to do to make a OpenID Connect implementation instead, and would it be better (for your own definition of better)?
-I \cite[section 3.1.2.2]{rfc6749} siger at public clients samt confidentional clients der benytter sig af den implicitte flow, skal registere deres redirect\_uri endpoints. Dette er ikke et krav for en confidential client. Dermed er der her mulighed for redirect manipulation. OpenID Connect derimod siger at alle clienter skal benytte pre registeret redirect\_uri.
+\cite[Section 3.1.2.2]{rfc6749} siger at public clients samt confidentional clients der benytter sig af den implicitte flow, skal registere deres redirect\_uri endpoints. Dette er ikke et krav for en confidential client. Dermed er der her mulighed for redirect manipulation. OpenID Connect derimod siger at alle clienter skal benytte pre registeret redirect\_uri.
 
 Vi registrerer ikke nogen redireict uri hos authorization serveren hvilket gør det sværere for authorization serveren at tjekke om redirecten efter user verification er korrekt i forhod til clienten. I specifikationerne for OpenID Connect står der explicit at disse skal matche præcis.
 Dette ville være med til at gøre vores implementation mere sikker over for forskellige former for redirect attacks.
 
-OpenID Connect benytter sig af en ID token. Denne er underskrevet af Authorization Serveren og indeholder en række informationer bl.a. et lokalt unikt bruger id, hvem der har udgivet denne, hvem den er tiltænkt og mulighed for en nonce client specificerer i authorizationen delen. Alt dette gør det muligt for clienten at sikre sig at brugeren faktisk har logget sig ind hos Auth Serveren, at den token der kommer er tiltænkt clienten og via. brugen af nonce at det er i det er sket i den nuværende session. OAuth gør det ikke.
+OpenID Connect benytter sig af en ID token. Denne er underskrevet af Authorization Serveren og indeholder en række informationer bl.a. et lokalt unikt bruger id, hvem der har udgivet denne, hvem den er tiltænkt og mulighed for en nonce clienten specificerer i authorizationen delen. Alt dette gør det muligt for clienten at sikre sig at brugeren faktisk har logget sig ind hos Auth Serveren, at den token der kommer er tiltænkt clienten og via. brugen af nonce, at det er sket i den nuværende session. OAuth gør ikke dette.
 
-Sikkerheden her er mest til clienten. Hvor access tokens har samme rolle med hensyn til authorizations, er ID token en væsentlig forbedring af muligheden for at authenication af resource owneren, da den gør det væsentlig svære at udgive sig som en man ikke er. Som eksempel i OAuth, en advesary kan have skaffet sig en access token og vil nu agere sig som en bestemt resource owner. Han giver client den ståjlne token. Clienten kan da kontakte Auth Serveren og se at denne token matcher Resource Owneren. I openID connect kan client hurtigt se at denne ID token ikke er tiltænkt ham via audience feltet og da de er signeret at Auth Serveren, kan man tjekke lokalt om en token er forfalsket.
+Sikkerheden her er mest til clienten. Hvor access tokens har samme rolle med hensyn til authorizations, er ID token en væsentlig forbedring af muligheden for authenication af resource owneren, da den gør det væsentlig svære at udgive sig som en man ikke er. Som eksempel i OAuth, en advesary kan have skaffet sig en access token og vil nu agere som en bestemt resource owner. Han giver clienten den ståjlne token. Clienten kan da kontakte Auth Serveren og se at denne token matcher Resource Owneren. I openID connect kan client hurtigt se at denne ID token ikke er tiltænkt ham via audience feltet og da ID tokens er signeret at Auth Serveren, kan man tjekke lokalt om en token er forfalsket.
 
 
 \begin{thebibliography}{9}
