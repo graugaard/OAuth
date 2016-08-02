@@ -1,0 +1,9 @@
+*.aux
+*.log
+*.out
+*.pdf
+*.iml
+*.thm
+.idea
+lib
+out
