@@ -21,7 +21,7 @@ import org.json.*;
 
 @Path("oauth")
 public class OAuthHandler {
-    //private String domain = "http://graugaard.bobach.eu:8080/";
+
     private String domain = Constants.DOMAIN;
 
     private final int TOKEN_LENGTH = 256/8;     // length in bytes

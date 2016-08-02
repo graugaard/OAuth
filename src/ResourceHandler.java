@@ -17,7 +17,6 @@ import java.net.URL;
 @Path("resource")
 public class ResourceHandler {
 
-    //private String domain = "http://graugaard.bobach.eu:8080/";
     private String domain = Constants.DOMAIN;
 
     @GET
