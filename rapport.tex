@@ -1,0 +1,101 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[danish]{babel}
+\renewcommand{\danishhyphenmins}{22} % bedre orddeling
+\usepackage[sc]{mathpazo}
+\linespread{1.05}
+\usepackage[T1]{fontenc}
+%\usepackage[margin=3.5cm]{geometry}
+\usepackage[amsmath,thmmarks]{ntheorem}
+\usepackage{paralist}
+\usepackage{tikz}
+\newcommand{\iprod}[2]{\left\langle #1, #2\right\rangle}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\theoremstyle{plain}
+\newtheorem{lemma}{Lemma}
+\newtheorem{thm}{Theorem}
+\theoremstyle{nonumberplain}
+\theoremheaderfont{%
+  \normalfont\bfseries}
+\theorembodyfont{\normalfont}
+\theoremsymbol{\ensuremath{\square}}
+\theoremseparator{.}
+\newtheorem{proof}{Proof}
+\title{Identity and Privacy \\Handin 2}
+\author{Christian Bobach std. nr. 20104256\\Jakob Laursen std. nr. 20093220}
+\date{Summer 2016}
+\begin{document}
+\maketitle
+\section*{Introduktion}
+%Build a simple version of the OAuth framework: Client (web app), Authorization server, Resource server
+%You should not be using an OAuth library, but implement the flow yourself, other libraries (network, encoding, etc.) are fine.
+%Keep it simple: You are allowed to cut some corners, you don’t have to use TLS, you do not need to have proper error handling etc. Only implement the “Sunshine scenario”.
+
+Vi har lavet et simpel OAuth framework med client\footnote{clienten kører på \url{http://graugaard.bobach.eu:8080/Client}}, authoraization server\footnote{Authorization serveren kører på \url{http://graugaard.bobach.eu:8080/OAuth/}} og resource server\footnote{resource serveren kører på \url{http://graugaard.bobach.eu:8080/OAuth/rest/resource}}. Vi har taget udgangspunkt i figur 3 fra \cite{iogp}  da vi lavede vores implementation.
+
+For at få adgang til clienten benyttes dette link \url{http://graugaard.bobach.eu:8080/Client/client.jsf}
+
+Vores flow er som følger
+\begin{enumerate}
+    \item Brugeren kontakter clienten via browseren og forsøgere at logge ind
+    \item Brugeren redirectes til authorization serveren med et id der identificere clienten, de permissions clienten forespørger og en uri hvor på svaret skal komme
+    \item Authorization serveren beder om verifikation fra brugeren og tilladelse om permissions på vejne af clienten
+    \item Brugerene verificere sig og giver tilladelse til de permissions som clieneten forespørger
+    \item Authorization servern generere en authorization code og redirecter brugeren til clienten på den korrekte uri
+    \item Clienten kontakter nu authorization serveren med id og authorization code
+    \item Authorization serveren generere nu en access token og sender denne til clienten
+    \item Clienten kontakter da recurse serveren med access token og permissions
+    \item Resource serveren verificere access tokenen med authorizations serveren og sender resourcerne til clienten
+\end{enumerate}
+
+Vi bruger ingen form for kryptologiske midler i vores implementation, så alt kommunikation foregår i plain text.
+
+\section*{Thereat analayse}
+%Choose two different threats, and analyze if your implementation is secure against these threats. If not what could you have done to make it secure.
+%RFC 6819: OAuth 2.0 Threat Model and Security Considerations: https://tools.ietf.org/html/rfc6819
+%The OAuth 2.0 Authorization Framework: https://tools.ietf.org/html/rfc6749
+Da vi ikke benytter os af SSL/TLS mener vi ikke at dette er interressant at omtale her da det ikke har noget med opbygningen af OAuth at gøre.
+
+\subsection*{Obtaining Access Tokens from Authorization Server Database}
+Da vi ikke benytter os af hashes eller lignende for at skjule vores access tokens over for eventueller indtrængende parter vil disse let kunne benyttes til at få adgang til resourser om brugerne på vegne af en ond client.
+
+Ved at benytte os af en kryptografisk hash funktion kan vi undgå at en intrænger kan benyttes sig af en access tokens direkt. Antaget at tokens er forholdsvis lange og leve tiden på dem er kort så er det ikke sansynligt at en adversary kan nå at gætte access tokenen der hører til en hash inden at tiden er udløbet på den access token. Dette gælder såfrem access tokens er genereret tilfældigt.
+
+Ved at sørge for at tokens er tilfældigt generet og lange betyder at vores message space er stort og derfor er dictionary attacks ikke feasable. Dette kombineret med at have kort levetid på access tokens betyder at der er forholds vis få tokens i live af gangen, dette medfører at sansynligheden for at en adversary kan gætte access tokenen der bruges som input til hash funktionen er meget lille.
+
+Der er ikke nogen grund til at benytte sig af salted hash hvis access tokens er genereret tilfældige i det fulde message space. Da sansynligheden for at få en collision med en kryptografisk collision resistent hash funktion ikke er tilstede.
+
+\subsection*{Authorization Code Redirection URI Manipulation}
+I implementationen benytter vi os ikke af nogen form for checks på redirect uri'en fra clienten. Dette kan udnyttes på flere måde af en adversary, uri'en kan ændres hos clienten under redirrected til authorization serveren, det kan være en inficeret client eller en adversary der er kommet i besidelse af et client id, som prøver at få fat i informationer omkring bruger. Adversaryen kan da omdirigere brugeren til sin egen uri.
+
+ Dette kan forhindres hvis clienten registrere en redirect uri hos authorization serveren, så denne kan verificere at uri'en er en der er kendt og knyttet op på clienten som brugen forsøger at benytte sig af.
+
+
+\section*{Sammenligning med OpenID Connect}
+%Compare your implementation with the OpenID Connect protocol, which changes would you have to do to make a OpenID Connect implementation instead, and would it be better (for your own definition of better)?
+Vi registrere ikke nogen redireict uri hos authorization serveren hvilket gør det sværere for authorization serveren at tjekke om redirecten efter user verification er korrekt i forhod til clienten. I specifikationerne for OpenID Connect står der explicit at disse skal match præcis.
+Dette ville være med til at gøre vores implementation mere sikker over for forskellige former for redirect attacks.
+
+OpenID Connect benytter sig af en ID token over for clienten som den bruger op imod resource servern til at verficere at det er præcis denne client der har adgang til de specifikke recourser hos recourse servern på vegne af brugeren.
+Hvilket ikke er noget vi benytter os af i vores implementation, dette vil være med til at sikre resource udlevringen til clienten på vegne af brugeren.
+
+
+\begin{thebibliography}{9}
+
+\bibitem{iogp}
+    Oscar Manso, Morten Christiansen and Gert Mikkelsen;
+    \emph{Comparative analysis - Web-based Identity Management Systems};
+    THE ALEXANDRA INSTITUTE;
+    15 December 2014;
+    \url{https://bb.au.dk/bbcswebdav/pid-581095-dt-content-rid-1224860_1/courses/BB-Cou-STADS-UUVA-51539/Authorization_Systems_Comparative_AI%281%29.pdf}
+
+\end{thebibliography}
+\end{document}
