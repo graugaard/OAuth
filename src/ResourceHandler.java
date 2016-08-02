@@ -18,7 +18,7 @@ import java.net.URL;
 public class ResourceHandler {
 
     //private String domain = "http://graugaard.bobach.eu:8080/";
-    private String domain = "http://localhost:8080";
+    private String domain = Constants.DOMAIN;
 
     @GET
     public Response getUserResources(@QueryParam("token") String token) throws IOException {
